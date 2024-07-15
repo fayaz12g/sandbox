@@ -7,8 +7,8 @@ const os = require('os');
 const app = express();
 
 const server = https.createServer({
-    key: fs.readFileSync('./key.pem'),
-    cert: fs.readFileSync('./cert.pem')
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
 }, app);
 
 const wss = new WebSocket.Server({ server });
@@ -26,6 +26,9 @@ wss.on('connection', (ws) => {
     });
     ws.on('close', () => {
         clients = clients.filter(client => client !== ws);
+    });
+    ws.on('error', (error) => {
+        console.error('WebSocket error:', error);
     });
 });
 

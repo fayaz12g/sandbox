@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
-    const [ip, setIp] = useState('');
+    const [ip, setIp] = useState('localhost'); // Default to localhost for testing
     const [name, setName] = useState('');
     const [connected, setConnected] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -10,9 +10,12 @@ function App() {
     const socketRef = useRef(null);
 
     const handleConnect = () => {
-        socketRef.current = new WebSocket(`wss://${ip}`);
+        socketRef.current = new WebSocket(`wss://${ip}:8080`); // Ensure correct port
         socketRef.current.onopen = () => {
             setConnected(true);
+        };
+        socketRef.current.onerror = (error) => {
+            console.error('WebSocket error:', error);
         };
         socketRef.current.onmessage = (event) => {
             const message = JSON.parse(event.data);
