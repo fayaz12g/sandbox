@@ -1,9 +1,16 @@
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
-const http = require('http');
 const WebSocket = require('ws');
+const os = require('os');
 
 const app = express();
-const server = http.createServer(app);
+
+const server = https.createServer({
+    key: fs.readFileSync('path/to/your/key.pem'),
+    cert: fs.readFileSync('path/to/your/cert.pem')
+}, app);
+
 const wss = new WebSocket.Server({ server });
 
 let clients = [];
@@ -27,6 +34,24 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
+
+const getLocalIPs = () => {
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
+    for (let interfaceName in interfaces) {
+        for (let interface of interfaces[interfaceName]) {
+            if (interface.family === 'IPv4' && !interface.internal) {
+                addresses.push(interface.address);
+            }
+        }
+    }
+    return addresses;
+};
+
 server.listen(PORT, () => {
+    const addresses = getLocalIPs();
     console.log(`Server is listening on port ${PORT}`);
+    addresses.forEach(address => {
+        console.log(`Server IP: ${address}`);
+    });
 });

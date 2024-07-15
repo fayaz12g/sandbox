@@ -10,15 +10,16 @@ function App() {
     const socketRef = useRef(null);
 
     const handleConnect = () => {
-        socketRef.current = new WebSocket(`ws://${ip}`);
-        socketRef.current.onopen = () => {
-            setConnected(true);
-        };
-        socketRef.current.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            setMessages((prevMessages) => [...prevMessages, message]);
-        };
-    };
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      socketRef.current = new WebSocket(`${protocol}://${ip}`);
+      socketRef.current.onopen = () => {
+          setConnected(true);
+      };
+      socketRef.current.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          setMessages((prevMessages) => [...prevMessages, message]);
+      };
+  };
 
     const handleSend = () => {
         const message = { name, text: newMessage };
