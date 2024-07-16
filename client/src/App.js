@@ -27,11 +27,7 @@ function App() {
             socketRef.current.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    if (message.type === 'initialMessages') {
-                        setMessages(message.data);
-                    } else {
-                        setMessages((prevMessages) => [...prevMessages, message]);
-                    }
+                    handleReceivedMessage(message);
                 } catch (error) {
                     console.error('Message parsing error:', error);
                 }
@@ -45,20 +41,50 @@ function App() {
         }
     };
 
+    const handleReceivedMessage = (message) => {
+        if (message.type === 'initialMessages') {
+            setMessages(message.data);
+        } else {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        }
+    };
+
     const handleSend = () => {
-        const message = { name, text: newMessage };
+        const message = { text: newMessage };
         socketRef.current.send(JSON.stringify(message));
-        setMessages((prevMessages) => [...prevMessages, { ...message, timestamp: new Date().toLocaleString() }]);
+        setMessages((prevMessages) => [...prevMessages, { ...message, name, timestamp: new Date().toLocaleString() }]);
         setNewMessage('');
+        scrollToBottom();
+    };
+
+    const scrollToBottom = () => {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     };
 
     const renderMessages = () => {
-        return messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.name === 'System' ? 'system' : (msg.name === name ? 'sent' : 'received')}`}>
-                <p><strong>{msg.name}</strong>: {msg.text}</p>
-                <p className="timestamp">{msg.timestamp}</p>
-            </div>
-        ));
+        return messages.map((msg, index) => {
+            if (msg.type === 'system') {
+                return (
+                    <div key={index} className="message system">
+                        <p>{msg.text}</p>
+                        <p className="timestamp">{msg.timestamp}</p>
+                    </div>
+                );
+            } else {
+                const isSent = msg.name === name;
+                const messageClass = isSent ? 'sent' : 'received';
+                const messageColor = isSent ? 'blue' : 'green';
+                const messageBgColor = isSent ? '#e0f7fa' : '#f0f0f0';
+                return (
+                    <div key={index} className={`message ${messageClass}`} style={{ backgroundColor: messageBgColor }}>
+                        {!isSent && <p className="name">{msg.name}</p>}
+                        <p className="content" style={{ color: messageColor }}>{msg.text}</p>
+                        <p className="timestamp">{msg.timestamp}</p>
+                    </div>
+                );
+            }
+        });
     };
 
     return (
@@ -68,7 +94,7 @@ function App() {
                     <p>Connecting to chat server...</p>
                 </div>
             ) : (
-                <div className="chatContainer">
+                <div className="chatContainer" id="chatContainer">
                     <div className="messages">
                         {renderMessages()}
                     </div>
@@ -78,6 +104,11 @@ function App() {
                             placeholder="Type a message..."
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSend();
+                                }
+                            }}
                         />
                         <button onClick={handleSend}>Send</button>
                     </div>

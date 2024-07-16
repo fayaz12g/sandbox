@@ -23,35 +23,41 @@
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
 }
 
 .messages {
   flex: 1;
-  overflow-y: auto;
   padding: 10px;
+  overflow-y: auto;
 }
 
 .message {
   margin: 5px 0;
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
 }
 
 .message.sent {
   text-align: right;
-  color: blue;
-  background-color: #e0f7fa; /* Light blue background for sent messages */
 }
 
 .message.received {
   text-align: left;
-  color: green;
-  background-color: #f0f0f0; /* Light gray background for received messages */
 }
 
 .message.system {
   text-align: center;
   color: red;
+  background-color: #ffebee; /* Light red background for system messages */
+}
+
+.name {
+  font-weight: bold;
+}
+
+.content {
+  margin: 0;
 }
 
 .timestamp {
