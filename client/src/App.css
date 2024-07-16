@@ -7,14 +7,11 @@
   background-color: #f0f0f0;
 }
 
-.joinScreen {
+.loadingScreen {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-}
-
-.joinScreen input, .joinScreen button {
-  margin: 5px;
+  height: 100vh;
 }
 
 .chatContainer {
@@ -36,16 +33,25 @@
 
 .message {
   margin: 5px 0;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .message.sent {
   text-align: right;
   color: blue;
+  background-color: #e0f7fa; /* Light blue background for sent messages */
 }
 
 .message.received {
   text-align: left;
   color: green;
+  background-color: #f0f0f0; /* Light gray background for received messages */
+}
+
+.message.system {
+  text-align: center;
+  color: red;
 }
 
 .timestamp {

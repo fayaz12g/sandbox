@@ -13,9 +13,12 @@ let messages = [];
 wss.on('connection', (ws) => {
     clients.push(ws);
 
+    // Send initial messages to the new client
     ws.send(JSON.stringify({ type: 'initialMessages', data: messages }));
 
-    const joinMessage = { name: 'System', text: 'A new user has joined the chat', timestamp: new Date().toLocaleString() };
+    // Notify other clients that a new user has joined
+    const username = getRandomUsername();
+    const joinMessage = { name: username, text: 'has joined the chat', timestamp: new Date().toLocaleString() };
     messages.push(joinMessage);
     broadcast(JSON.stringify(joinMessage));
 
@@ -43,9 +46,14 @@ function broadcast(message) {
     });
 }
 
-app.get('/', (req, res) => {
-    res.send('WebSocket server is running');
-});
+function getRandomUsername() {
+    const adjectives = ['Cool', 'Awesome', 'Fantastic', 'Epic'];
+    const nouns = ['Dude', 'Ninja', 'Warrior', 'Wizard'];
+    const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+    const randomNumber = Math.floor(Math.random() * 100).toString().padStart(2, '0'); // Generate random two-digit number
+    return `${randomAdj}${randomNoun}${randomNumber}`;
+}
 
 const PORT = process.env.PORT || 443;
 

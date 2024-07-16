@@ -1,17 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 function App() {
-    const [ip, setIp] = useState('localhost'); // Default to localhost for testing
     const [name, setName] = useState('');
     const [connected, setConnected] = useState(false);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const socketRef = useRef(null);
 
-    const handleConnect = () => {
-        const wsURL = `wss://fmess.fly.dev:443`;
-        
+    useEffect(() => {
+        connectToWebSocket();
+    }, []); // Connect to WebSocket on component mount
+
+    const connectToWebSocket = () => {
+        const wsURL = `wss://fmess.fly.dev`;
+
         try {
             socketRef.current = new WebSocket(wsURL);
             socketRef.current.onopen = () => {
@@ -49,40 +52,32 @@ function App() {
         setNewMessage('');
     };
 
+    const renderMessages = () => {
+        return messages.map((msg, index) => (
+            <div key={index} className={`message ${msg.name === 'System' ? 'system' : (msg.name === name ? 'sent' : 'received')}`}>
+                <p><strong>{msg.name}</strong>: {msg.text}</p>
+                <p className="timestamp">{msg.timestamp}</p>
+            </div>
+        ));
+    };
+
     return (
         <div className="App">
             {!connected ? (
-                <div className="joinScreen">
-                    <input 
-                        type="text" 
-                        placeholder="Server IP" 
-                        value={ip} 
-                        onChange={(e) => setIp(e.target.value)} 
-                    />
-                    <input 
-                        type="text" 
-                        placeholder="Your Name" 
-                        value={name} 
-                        onChange={(e) => setName(e.target.value)} 
-                    />
-                    <button onClick={handleConnect}>Join</button>
+                <div className="loadingScreen">
+                    <p>Connecting to chat server...</p>
                 </div>
             ) : (
                 <div className="chatContainer">
                     <div className="messages">
-                        {messages.map((msg, index) => (
-                            <div key={index} className={`message ${msg.name === name ? 'sent' : 'received'}`}>
-                                <p><strong>{msg.name}</strong>: {msg.text}</p>
-                                <p className="timestamp">{msg.timestamp}</p>
-                            </div>
-                        ))}
+                        {renderMessages()}
                     </div>
                     <div className="inputContainer">
-                        <input 
-                            type="text" 
-                            placeholder="Type a message..." 
-                            value={newMessage} 
-                            onChange={(e) => setNewMessage(e.target.value)} 
+                        <input
+                            type="text"
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
                         />
                         <button onClick={handleSend}>Send</button>
                     </div>
