@@ -10,8 +10,7 @@ function App() {
     const socketRef = useRef(null);
 
     const handleConnect = () => {
-        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsURL = `${protocol}://${ip}:${protocol === 'wss' ? 8443 : 8080}`;
+        const wsURL = `$wss://${ip}:8080`;
         
         try {
             socketRef.current = new WebSocket(wsURL);
