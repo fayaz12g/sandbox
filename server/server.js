@@ -1,12 +1,23 @@
+const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const express = require('express');
 const WebSocket = require('ws');
 const os = require('os');
+const path = require('path');
 
 const app = express();
-const server = http.createServer(app);
 
-const wss = new WebSocket.Server({ server });
+// HTTPS configuration
+const httpsOptions = {
+    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, 'server.cert'))
+};
+
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(httpsOptions, app);
+
+const wss = new WebSocket.Server({ noServer: true });
 
 let clients = [];
 let messages = [];
@@ -14,10 +25,8 @@ let messages = [];
 wss.on('connection', (ws) => {
     clients.push(ws);
 
-    // Send all previous messages to the new client
     ws.send(JSON.stringify({ type: 'initialMessages', data: messages }));
 
-    // Announce new user
     const joinMessage = { name: 'System', text: 'A new user has joined the chat', timestamp: new Date().toLocaleString() };
     messages.push(joinMessage);
     clients.forEach(client => {
@@ -47,11 +56,23 @@ wss.on('connection', (ws) => {
     });
 });
 
+const serverHandler = (server) => {
+    server.on('upgrade', (request, socket, head) => {
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+        });
+    });
+};
+
+serverHandler(httpServer);
+serverHandler(httpsServer);
+
 app.get('/', (req, res) => {
     res.send('WebSocket server is running');
 });
 
 const PORT = process.env.PORT || 8080;
+const HTTPS_PORT = process.env.HTTPS_PORT || 8443;
 
 const getLocalIPs = () => {
     const interfaces = os.networkInterfaces();
@@ -66,9 +87,17 @@ const getLocalIPs = () => {
     return addresses;
 };
 
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     const addresses = getLocalIPs();
-    console.log(`Server is listening on port ${PORT}`);
+    console.log(`HTTP Server is listening on port ${PORT}`);
+    addresses.forEach(address => {
+        console.log(`Server IP: ${address}`);
+    });
+});
+
+httpsServer.listen(HTTPS_PORT, () => {
+    const addresses = getLocalIPs();
+    console.log(`HTTPS Server is listening on port ${HTTPS_PORT}`);
     addresses.forEach(address => {
         console.log(`Server IP: ${address}`);
     });
