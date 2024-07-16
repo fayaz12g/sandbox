@@ -10,7 +10,7 @@ function App() {
     const socketRef = useRef(null);
 
     const handleConnect = () => {
-        const wsURL = `$wss://${ip}:8080`;
+        const wsURL = `wss://fmess.fly.dev:443`;
         
         try {
             socketRef.current = new WebSocket(wsURL);

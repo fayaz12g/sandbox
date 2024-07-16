@@ -1,9 +1,10 @@
 const express = require('express');
+const http = require('http');
 const WebSocket = require('ws');
 const os = require('os');
 
 const app = express();
-const httpServer = require('http').createServer(app);
+const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 
 let clients = [];
@@ -46,7 +47,7 @@ app.get('/', (req, res) => {
     res.send('WebSocket server is running');
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 443;
 
 const getLocalIPs = () => {
     const interfaces = os.networkInterfaces();
